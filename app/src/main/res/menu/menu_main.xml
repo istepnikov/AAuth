@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.example.istepnikov.aauth.MainActivity">
+    <item android:id="@+id/action_sign_in"
+          android:title="@string/action_sign_in"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+    <item android:id="@+id/action_sign_out"
+          android:title="@string/action_sign_out"
+          android:orderInCategory="200"
+          android:enabled="false"
+          app:showAsAction="never"/>
+    <item android:id="@+id/action_revoke_access"
+          android:title="@string/action_revoke_access"
+          android:orderInCategory="300"
+          android:enabled="false"
+          app:showAsAction="never"/>
+</menu>

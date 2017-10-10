@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AAuth</string>
+    <string name="action_sign_in">Sign In</string>
+    <string name="action_sign_out">Sign Out</string>
+    <string name="action_revoke_access">Revoke Access</string>
+    <string name="unauthenticated">Unauthenticated</string>
+</resources>
