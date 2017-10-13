@@ -12,22 +12,31 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 
+import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks{
@@ -40,6 +49,11 @@ public class MainActivity extends AppCompatActivity implements
     private Menu menu;
 
     private String displayName = "";
+
+    String scopes = "oauth2:"
+            + Scopes.PLUS_LOGIN
+            + " "
+            + Scopes.PROFILE;
 
     @Override
     public boolean onCreatePanelMenu(int featureId, Menu menu) {
@@ -77,9 +91,16 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
+
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 //                .requestIdToken(server_client_id)
                 .requestEmail()
+//                .requestScopes(new Scope(Scopes.DRIVE_APPFOLDER))
+//                .requestScopes(new Scope(scopes))
+                .requestScopes(new Scope(Scopes.PLUS_LOGIN), new Scope(Scopes.PROFILE))
+                .requestServerAuthCode("684544763684-hv0kj6g6rcoc8u72fisaqipo8jhr2aie.apps.googleusercontent.com", false)
+//                .requestIdToken("684544763684-hv0kj6g6rcoc8u72fisaqipo8jhr2aie.apps.googleusercontent.com")
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -144,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements
             System.out.println("Successful");
             ((TextView)findViewById(R.id.text1)).setText("User: "+ acct.getDisplayName() +
                     " (" + acct.getEmail() + ")");
+            System.out.println("Ticket:"+acct.getServerAuthCode());
 
             displayName = acct.getDisplayName();
 
@@ -152,6 +174,27 @@ public class MainActivity extends AppCompatActivity implements
             menu.findItem(R.id.action_revoke_access).setEnabled(true);
             findViewById(R.id.chart).setVisibility(View.VISIBLE);
             buildChart();
+
+            //get OAuth2 token
+//            try {
+//                String token = GoogleAuthUtil.getToken(getApplicationContext(), acct.getAccount(),scopes);
+//                System.out.println("OAuth2 token: "+token);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (GoogleAuthException e) {
+//                e.printStackTrace();
+//            }
+            RetrieveTokenTask task = new RetrieveTokenTask();
+            task.setActivity(this);
+            task.execute(acct.getAccount());
+//            try {
+//                String token = task.get();
+//                System.out.println("Google OAuth Access Token: "+token);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            }
         } else {
             // Signed out, show unauthenticated UI. Console.
             System.out.println("Unsuccessful");
@@ -199,5 +242,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionSuspended(int i) {
 
+    }
+
+    private void startBilling(){
+        InAppBilling billing = new InAppBilling(this);
     }
 }
